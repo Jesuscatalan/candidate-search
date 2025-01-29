@@ -44,3 +44,4 @@ const searchGithubUser : (username : string) => Promise<any> = async (username: 
 };
 
 export { searchGithub, searchGithubUser };
+
