@@ -1,33 +1,72 @@
-# React + TypeScript + Vite
+# Candidate Search Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Description
+This project is a Candidate Search application built with TypeScript and React. It interacts with the GitHub API to retrieve and display candidate profiles. Users can accept or reject candidates, and accepted candidates are stored in local storage for future reference. The application is deployed on Render.
 
-Currently, two official plugins are available:
+## Features
+- Fetches candidate profiles from GitHub API
+- Displays candidate information including name, username, location, avatar, email, GitHub profile, and company
+- Allows users to accept or reject candidates
+- Saves accepted candidates in local storage
+- Displays a list of saved candidates
+- Persistent storage for accepted candidates
+- Deployed to Render
 
-* [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md), which uses [Babel](https://babeljs.io/) for Fast Refresh
-* [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc), which uses [SWC](https://swc.rs/) for Fast Refresh
+## Technologies Used
+- TypeScript
+- React
+- GitHub API
+- Local Storage
+- Render (for deployment)
 
-## Expanding the ESLint configuration
+## Installation and Setup
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/Jesuscatalan/candidate-search.git
+   ```
+2. Navigate to the project directory:
+   ```sh
+   cd candidate-search
+   ```
+3. Install dependencies:
+   ```sh
+   npm install
+   ```
+4. Create a `.env` file in the `environment` folder and add your GitHub Personal Access Token:
+   ```sh
+   VITE_GITHUB_TOKEN=your_personal_access_token
+   ```
+5. Start the development server:
+   ```sh
+   npm run dev
+   ```
+6. Open the application in your browser at `http://localhost:`
 
-If you're developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+To deploy your own version:
+1. Push your project to a GitHub repository.
+2. Create a new web service on Render.
+3. Connect it to your GitHub repository.
+4. Set up environment variables on Render.
+5. Deploy and access your live application.
 
-* Configure the top-level `parserOptions` property as follows:
+## Challenges & Learnings
+During development, I learned how to:
+- Work with TypeScript and interfaces for API responses
+- Manage state and props in React effectively
+- Store and retrieve data using local storage
+- Deploy a React application to Render with environment variables
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+## Future Improvements
+- Implement sorting and filtering for saved candidates
+- Enhance UI design for better user experience
+- Improve error handling for API requests
 
-* Replace `plugin:@typescript-eslint/recommended` with `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`.
-* Optionally, add `plugin:@typescript-eslint/stylistic-type-checked`.
-* Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` and `plugin:react/jsx-runtime` to the `extends` list.
 
----
-© 2024 edX Boot Camps LLC. Confidential and Proprietary. All Rights Reserved.
+## License
+This project is licensed under the MIT License.
+
+## Contact
+If you have any questions, feel free to reach out:
+- GitHub: [Jesuscatalan](https://github.com/Jesuscatalan)
+- Email: Jesusecatalan101598@icloud.com
+
