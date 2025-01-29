@@ -1,137 +1,114 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { searchGithub, searchGithubUser } from '../api/API';
-import { ICandidate } from '../interfaces/Candidate.interface';
+import { Candidate } from '../interfaces/Candidate.interface';
 
-const CandidateFinder: React.FC = () => {
-  const [candidateList, setCandidateList] = useState<ICandidate[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [savedList, setSavedList] = useState<ICandidate[]>([]);
-  const [detailFetched, setDetailFetched] = useState<number | null>(null);
-  const maxResults = 10;
+const CandidateSearch= () => {
+  const [candidate, setCandidate] = useState<Candidate | null>(null);
+  const [savedCandidates, setSavedCandidates] = useState<Candidate[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [users, setUsers] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
 
-  const loadCandidates = async () => {
-    setLoading(true);
-    setErrorMsg(null);
-
-    try {
-      const candidates: ICandidate[] = await searchGithub();
-      if (!Array.isArray(candidates)) {
-        throw new Error("Received invalid data from API.");
-      }
-      const validCandidates = candidates.filter((candidate): candidate is ICandidate => candidate.userLogin && candidate.profileUrl); // Filter out incomplete entries
-      const limitedCandidates = validCandidates.slice(0, maxResults);
-
-      setCandidateList(limitedCandidates);
-    } catch (error) {
-      console.error('Error loading candidates:', error);
-      setErrorMsg('Error loading candidates, try again.');
-    } finally {
-      setLoading(false);
+  useEffect(() : void => {
+    const savedData : string | null = localStorage.getItem('savedCandidates');
+    if (savedData) {
+      setSavedCandidates(JSON.parse(savedData));
     }
-  };
-
-  const loadCandidateDetails = async (candidate: ICandidate) => {
-    try {
-      const detailed = await searchGithubUser(candidate.userLogin);
-      return detailed;
-    } catch (error) {
-      console.error('Error fetching candidate details:', error);
-      return null;
-    }
-  };
-
-  const handleSaveCandidate = (candidate: ICandidate) => {
-    if (candidate) {
-      const updatedSavedList = [...savedList, candidate];
-      setSavedList(updatedSavedList);
-      localStorage.setItem('savedCandidates', JSON.stringify(updatedSavedList));
-      goToNext();
-    }
-  };
-
-  const handleRemoveFromList = () => {
-    goToNext();
-  };
-
-  const goToNext = () => {
-    if (currentIndex < candidateList.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    } else {
-      setCandidateList([]); // Clear list once all candidates are viewed
-    }
-  };
-
-  useEffect(() => {
-    const storedSavedCandidates = localStorage.getItem('savedCandidates');
-    if (storedSavedCandidates) {
-      try {
-        const parsedSaved = JSON.parse(storedSavedCandidates) as ICandidate[];
-        setSavedList(parsedSaved);
-      } catch (error) {
-        console.error('Error parsing saved candidates:', error);
-        localStorage.removeItem('savedCandidates');
-      }
-    }
-
-    loadCandidates();
+    fetchCandidateList().then(r => r);
   }, []);
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      if (candidateList.length > 0 && detailFetched !== currentIndex) {
-        const candidateWithDetails = await loadCandidateDetails(candidateList[currentIndex]);
-        if (candidateWithDetails) {
-          setCandidateList(prevList =>
-            prevList.map((candidate, index) =>
-              index === currentIndex ? candidateWithDetails : candidate
-            )
-          );
-        }
-        setDetailFetched(currentIndex);
+  const fetchCandidateList = async () : Promise<void> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response : any = await searchGithub();
+      console.log('Response:', response);
+      if (response.length > 0) {
+        setUsers(response.map((user: any) : any => user.login));
+        await fetchCandidateDetails(response[0].login);
+      } else {
+        setError('No candidates found');
       }
-    };
+    } catch (err) {
+      setError('Failed to fetch candidates.');
+    }
+    setLoading(false);
+  };
 
-    fetchDetails();
-  }, [candidateList, currentIndex, detailFetched]);
+  const fetchCandidateDetails : (username : string) => Promise<void> = async (username: string) : Promise<void> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const userData : any = await searchGithubUser(username);
+      setCandidate({
+        name: userData.name,
+        login: userData.login,
+        location: userData.location,
+        avatar_url: userData.avatar_url,
+        email: userData.email,
+        company: userData.company,
+        html_url: userData.html_url,
+        username: userData.login,
+        blog: userData.blog,
+        twitter_username: userData.twitter_username ?? null,
+        hireable: userData.hireable ?? null,
+        bio: userData.bio ?? null,
+      });
+    } catch (err) {
+      setError('Failed to fetch candidate details.');
+      setCandidate(null);
+    }
+    setLoading(false);
+  };
 
-  const currentCandidate = candidateList.length > 0 ? candidateList[currentIndex] : null;
+  const saveCandidate = () => {
+    if (candidate) {
+      const updatedSavedCandidates : Candidate[] = [...savedCandidates, candidate];
+      setSavedCandidates(updatedSavedCandidates);
+      localStorage.setItem('savedCandidates', JSON.stringify(updatedSavedCandidates));
+      getNextCandidate();
+    }
+  };
+
+  const getNextCandidate = () => {
+    if (currentIndex < users.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      fetchCandidateDetails(users[currentIndex + 1]).then(r => r);
+    } else {
+      setCandidate(null);
+    }
+  };
 
   return (
-    <div className="candidate-finder">
-      <h1>Candidate Search</h1>
-      <div className="candidate-container">
-        {loading ? (
-          <p>Loading...</p>
-        ) : errorMsg ? (
-          <p className="error-message">{errorMsg}</p>
-        ) : currentCandidate ? (
-          <div key={currentCandidate.userLogin} className="candidate-card">
-            <img
-              src={currentCandidate.avatarUrl || 'https://placehold.co/400'}
-              alt={currentCandidate.fullName || 'No image'} />
-            <div className="card-info">
-              <h3>{currentCandidate.fullName}</h3>
-              <p>Username: {currentCandidate.userLogin}</p>
-              <p>Location: {currentCandidate.userLocation || 'N/A'}</p>
-              <p>Email: {currentCandidate.contactEmail ? <a href={`mailto:${currentCandidate.contactEmail}`}>{currentCandidate.contactEmail}</a> : 'N/A'}</p>
-              <p>GitHub: <a href={currentCandidate.profileUrl || 'N/A'} target='_blank'>{currentCandidate.profileUrl}</a></p>
-              <p>Company: {currentCandidate.companyName || 'N/A'}</p>
-            </div>
-            <div className="action-buttons">
-              <button onClick={handleRemoveFromList}>Skip</button>
-              <button onClick={() => handleSaveCandidate(currentCandidate)}>Save</button>
-            </div>
+    <main className="candidate-container">
+      {loading && <p>Loading candidate...</p>}
+      {error && <p className="error">{error}</p>}
+      {!loading && candidate ? (
+        <div className="candidate-card">
+          <img src={candidate.avatar_url} alt={candidate.name} className="candidate-avatar" />
+          <h2>{candidate.name}</h2>
+          <p>Username: {candidate.login ?? 'No Username Provided'}</p>
+          <p>Bio: {candidate.bio ?? 'No Bio available'}</p>
+          <p>Blog: {candidate.blog || 'No Blog available'}</p>
+          <p>Email: {candidate.email || 'No Email available'}</p>
+          <p>Location: {candidate.location || 'No Location specified'}</p>
+          <p>Company: {candidate.company || 'No Company specified'}</p>
+          <p>Twitter Username: {candidate.twitter_username ?? 'Not Specified'}</p>
+          <p>Hireable: {candidate.hireable || 'Not open to work'}</p>
+          <a href={candidate.html_url} target="_blank" rel="noopener noreferrer">
+            View GitHub Profile
+          </a>
+          <div className="button-group">
+            <button onClick={saveCandidate} className="btn-save">✅</button>
+            <button onClick={getNextCandidate} className="btn-skip">❌</button>
           </div>
-        ) : candidateList.length === 0 ? (
-          <p>No candidates left. Refresh the page to get more candidates.</p>
-        ) : (
-          <p>No candidates available.</p>
-        )}
-      </div>
-    </div>
+        </div>
+      ) : (
+        !loading && <p>No more candidates available</p>
+      )}
+    </main>
   );
 };
 
-export default CandidateFinder;
+export default CandidateSearch;

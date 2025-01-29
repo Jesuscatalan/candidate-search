@@ -33,7 +33,7 @@ body {
   background-repeat: no-repeat no-repeat;
   background-position: center center;
   margin: 0;
-  place-items: center;
+  /* place-items: center; */
   min-width: 320px;
   min-height: 100vh;
 }
@@ -44,7 +44,7 @@ h1 {
 }
 
 button {
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
@@ -90,8 +90,25 @@ tr {
   color: white;
 }
 
+td {
+  padding: 0.5em;
+  word-wrap: break-word;
+}
+
 tbody tr:nth-child(odd) {
   background-color: #333333;
+}
+
+table td:nth-child(1),
+table td:nth-last-child(1) {
+  text-align: center;
+}
+
+.table-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 25%;
+  object-fit: cover;
 }
 
 .nav {
@@ -117,4 +134,45 @@ tbody tr:nth-child(odd) {
 .table {
   width: 80vw;
   table-layout: fixed;
+}
+
+.candidates {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.candidate-card {
+  display: flex;
+  flex-direction: column;
+  margin: 1em;
+  width: 300px;
+}
+
+.candidate-card img {
+  border-radius: 20px 20px 0 0;
+}
+
+.card-content {
+  padding-left: 1em;
+  background-color: #000;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5em 1em;
+}
+
+.search-bar {
+  width: 25%;
+  padding: 0.5em;
+  margin: 1em;
+  border-radius: 10px;
+  background-color: #000;
+  font-size: medium;
+  color: #fff;
 }
